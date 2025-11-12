@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Clear loading message
       activitiesList.innerHTML = "";
 
+      // Reset activity select (avoid duplicate options if function re-runs)
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
+
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
@@ -20,12 +23,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
-        activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-        `;
+        // Create markup for main fields
+        const title = document.createElement("h4");
+        title.textContent = name;
+
+        const desc = document.createElement("p");
+        desc.textContent = details.description;
+
+        const schedule = document.createElement("p");
+        schedule.innerHTML = `<strong>Schedule:</strong> ${details.schedule}`;
+
+        const availability = document.createElement("p");
+        availability.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
+
+        // Participants section
+        const participantsSection = document.createElement("div");
+        participantsSection.className = "participants-section";
+
+        const participantsHeader = document.createElement("p");
+        participantsHeader.className = "participants-header";
+        participantsHeader.innerHTML = `<strong>Participants:</strong>`;
+
+        const participantsList = document.createElement("ul");
+        participantsList.className = "participants-list";
+
+        if (Array.isArray(details.participants) && details.participants.length > 0) {
+          details.participants.forEach((p) => {
+            const li = document.createElement("li");
+            // Use textContent to avoid injecting HTML
+            li.textContent = p;
+            participantsList.appendChild(li);
+          });
+        } else {
+          const noOne = document.createElement("li");
+          noOne.className = "no-participants";
+          noOne.textContent = "No participants yet.";
+          participantsList.appendChild(noOne);
+        }
+
+        participantsSection.appendChild(participantsHeader);
+        participantsSection.appendChild(participantsList);
+
+        // Assemble card
+        activityCard.appendChild(title);
+        activityCard.appendChild(desc);
+        activityCard.appendChild(schedule);
+        activityCard.appendChild(availability);
+        activityCard.appendChild(participantsSection);
 
         activitiesList.appendChild(activityCard);
 
